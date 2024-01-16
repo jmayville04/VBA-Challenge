@@ -1,0 +1,168 @@
+
+
+Sub stockscript()
+For Each ws In Worksheets
+
+'set variable for ticker name
+Dim ticker_name As String
+
+'set variable for count of volume trade
+Dim ticker_volume As Double
+ticker_volume = 0
+
+'keep track of location of each ticker name in table
+Dim sum_ticker_row As Integer
+sum_ticker_row = 2
+
+'set open/close, year and percent change as variable
+Dim open_price As Double
+Dim close_price As Double
+Dim yearly_change As Double
+'as variant works if error
+Dim percent_change As Double
+
+'setting up greatest stock increase and decrease as well as total volume
+Dim max_increase As Double
+Dim max_increase_ticker As String
+max_increase = 0
+Dim max_decrease As Double
+Dim max_decrease_ticker As String
+max_decrease = 0
+Dim max_volume As Double
+Dim max_volume_ticker As String
+max_volume = 0
+
+'set open price
+open_price = ws.Cells(2, 3).Value
+
+'label summary table headers
+ws.Cells(1, 9).Value = "Ticker"
+ws.Cells(1, 10).Value = "yearly change"
+ws.Cells(1, 11).Value = "percent change"
+ws.Cells(1, 12).Value = "total stock volume"
+ws.Cells(1, "O").Value = "Ticker"
+ws.Cells(1, "P").Value = "Value"
+ws.Cells(2, "N").Value = "Greatest % Increase"
+ws.Cells(3, "N").Value = "Greatest % Decrease"
+ws.Cells(4, "N").Value = "Greatest Total Volume"
+
+'find and establish last row
+lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+'loop through rows
+For i = 2 To lastrow
+
+If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1) Then
+
+'set tickername
+ticker_name = ws.Cells(i, 1).Value
+
+'add volume
+ticker_volume = ticker_volume + ws.Cells(i, 7).Value
+
+'assign ticker name location in summary field
+ws.Range("I" & sum_ticker_row).Value = ticker_name
+
+'assign volume for each ticker in summary field
+ws.Range("L" & sum_ticker_row).Value = ticker_volume
+
+'collect close price
+close_price = ws.Cells(i, 6)
+
+'calculate closing price
+yearly_change = (close_price - open_price)
+
+'assign yearly change in summary field
+ws.Range("J" & sum_ticker_row).Value = yearly_change
+
+If ws.Range("J" & sum_ticker_row).Value >= 0 Then
+ws.Range("J" & sum_ticker_row).Interior.ColorIndex = 10
+Else
+ws.Range("J" & sum_ticker_row).Interior.ColorIndex = 3
+
+End If
+
+
+If open_price = 0 Then
+percent_change = 0
+Else
+
+percent_change = yearly_change / open_price
+
+End If
+
+'assign yearly change in summary field and set format
+ws.Range("K" & sum_ticker_row).Value = percent_change
+ws.Range("K" & sum_ticker_row).NumberFormat = "0.00%"
+
+'Find greatest increase and decrease value and ticker as well as greatest total volume
+If ws.Range("K" & sum_ticker_row) > max_increase Then
+max_increase = ws.Range("K" & sum_ticker_row).Value
+max_increase_ticker = ws.Range("I" & sum_ticker_row).Value
+
+End If
+
+If ws.Range("K" & sum_ticker_row) < max_decrease Then
+max_decrease = ws.Range("K" & sum_ticker_row)
+max_decrease_ticker = ws.Range("I" & sum_ticker_row)
+
+End If
+
+If ws.Range("L" & sum_ticker_row) > max_volume Then
+max_volume = ws.Range("L" & sum_ticker_row).Value
+max_volume_ticker = ws.Range("I" & sum_ticker_row)
+
+End If
+
+
+
+'Reset variables for next ticker
+ticker_volume = 0
+
+'Move to next row in summary field
+sum_ticker_row = sum_ticker_row + 1
+
+
+'reset open price
+open_price = ws.Cells(i + 1, 3)
+
+Else
+
+'add trade volume
+ticker_volume = ticker_volume + ws.Cells(i, 7).Value
+
+End If
+
+'Next i
+
+'establish new last row for yearly change
+'lastrow = ws.Cells(Rows.Count, 10).End(xlUp).Row
+
+'For i = 2 To lastrow
+
+'If ws.Cells(i, 10).Value >= 0 Then
+'ws.Cells(i, 10).Interior.ColorIndex = 10
+'Else
+'ws.Cells(i, 10).Interior.ColorIndex = 3
+
+'End If
+
+Next i
+
+'assignin summary table max value and ticker name and format
+
+ws.Cells(2, "P").Value = max_increase
+ws.Cells(2, "P").NumberFormat = "0.00%"
+ws.Cells(2, "O").Value = max_increase_ticker
+ws.Cells(2, "O").NumberFormat = "0.00%"
+ws.Cells(3, "P").Value = max_decrease
+ws.Cells(3, "P").NumberFormat = "0.00%"
+ws.Cells(3, "O").Value = max_decrease_ticker
+ws.Cells(3, "O").NumberFormat = "0.00%"
+ws.Cells(4, "P").Value = max_volume
+ws.Cells(4, "O").Value = max_volume_ticker
+
+
+Next ws
+
+End Sub
